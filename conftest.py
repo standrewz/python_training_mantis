@@ -1,5 +1,6 @@
 import pytest
 from fixture.application import Application
+from fixture.db import DbFixture
 import json
 import os.path
 
@@ -23,6 +24,15 @@ def app(request):
         fixture = Application(browser=browser, base_url=web_config['web']['baseUrl'])
         fixture.session.ensure_login(username=web_config['webadmin']['username'], password=web_config['webadmin']['password'])
     return fixture
+
+@pytest.fixture(scope="session", autouse=True)
+def db(request):
+    db_config = load_config(request.config.getoption("--target"))['db']
+    dbfixture = DbFixture(host=db_config['host'], name=db_config['name'], user=db_config['user'], password=db_config['password'])
+    def fin():
+        dbfixture.destroy()
+    request.addfinalizer(fin)
+    return dbfixture
 
 @pytest.fixture(scope="session", autouse=True)
 def stop(request):
