@@ -4,24 +4,23 @@ from model.project import Project
 
 class SoapHelper:
 
+    soap_url = "api/soap/mantisconnect.php?wsdl"
+
     def __init__(self, app):
         self.app = app
-        self.username = "administrator"
-        self.password = "root"
-        self.soap_url = "http://localhost/mantisbt-1.2.20/api/soap/mantisconnect.php?wsdl"
 
     def can_login(self):
-        client = Client(self.soap_url)
+        client = Client(self.app.base_url + self.soap_url)
         try:
-            client.service.mc_login(self.username, self.password)
+            client.service.mc_login(self.app.login, self.app.password)
             return True
         except WebFault:
             return False
 
     def get_projects_list(self):
-         client = Client(self.soap_url)
+         client = Client(self.app.base_url + self.soap_url)
          try:
-              soap_result = client.service.mc_projects_get_user_accessible(self.username, self.password)
+              soap_result = client.service.mc_projects_get_user_accessible(self.app.login, self.app.password)
               projects = []
               for rec in soap_result:
                    id = rec.id
